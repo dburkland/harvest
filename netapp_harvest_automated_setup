@@ -1,0 +1,40 @@
+#! /usr/bin/env bash
+# chkconfig: - 99 02
+# description:	NetApp Harvest Automated Setup
+# processname: netapp_harvest_automated_setup
+### BEGIN INIT INFO
+# Provides: netapp_harvest_automated_setup
+# Required-Start: $all
+# Required-Stop: $remote_fs $syslog
+# Short-Description: Start netapp_harvest_automated_setup at boot time
+# Description: The purpose of this init script is to trigger the automated configuration (at boot) once a container has been created based on the "dburkland/harvest" Docker image.
+### END INIT INFO
+
+start() {
+	# Verify NetApp Grafana/Graphite/Harvest Automated Setup Has Been Completed
+	if [ ! -e /etc/.netapp_automated_setup ]; then
+		# Variables
+		export LANG="en_US.UTF-8"
+		#PROXY_PLACEHOLDER1
+	
+		echo "Starting Automated Configuration..."
+		/root/mysql_silent.sh >> /var/log/netapp_harvest_automated_setup.log
+		/root/grafana_graphite_harvest_silent.sh >> /var/log/netapp_harvest_automated_setup.log
+		
+		echo "Automated Configuration Complete"
+		touch /etc/.netapp_automated_setup
+	fi
+}
+
+case "$1" in
+	start)
+		start
+	;;
+	stop)
+	;;
+	*)
+		echo $"Usage: $0 {start}"
+		exit 2
+esac
+
+exit $?
