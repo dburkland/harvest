@@ -1,3 +1,6 @@
+LICENSE
+=========
+
 Copyright (c) 2016, Daniel Burkland
 All rights reserved.
 
