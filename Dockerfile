@@ -1,5 +1,5 @@
 FROM centos:centos6
-MAINTAINER Dan Burkland <Dan.Burkland@netapp.com>
+MAINTAINER Dan Burkland <dburkland@dburkland.com>
 ENV container docker
 #PROXY_PLACEHOLDER1
 COPY netapp-harvest-*.zip /root/
