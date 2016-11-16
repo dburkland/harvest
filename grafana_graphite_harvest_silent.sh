@@ -190,8 +190,9 @@ echo "Setup of Grafana is complete."
 echo "Setting up Harvest..."
 cd /root
 unzip '*netapp-harvest-*.zip' 2>&1
-mv -v netapp-harvest /opt/
-mv -vf *db_netapp*.json /opt/netapp-harvest/grafana/
+tar xvf *netapp-harvest-*.tgz -C /opt/
+#mv -v netapp-harvest /opt/
+#mv -vf *db_netapp*.json /opt/netapp-harvest/grafana/
 
 if [ ! -e /opt/netapp-harvest-conf/netapp-harvest.conf ]; then
 cat << EOF > /opt/netapp-harvest-conf/netapp-harvest.conf
