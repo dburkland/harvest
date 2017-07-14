@@ -280,6 +280,9 @@ cd /root
 unzip netapp-manageability-sdk-*.zip netapp-manageability-sdk-*/lib/perl/NetApp/* 2>&1
 mv -v netapp-manageability-sdk-*/lib/perl/NetApp/* /opt/netapp-harvest/lib/
 
+# Copy the updated node dashboard files which include the latest fixes as of 2017-07-13
+mv -v db_netapp-*.json /opt/netapp-harvest/grafana/
+
 # Enable Harvest to start at boot and start it
 ln -s /opt/netapp-harvest/util/netapp-harvest /etc/init.d/
 chkconfig --add netapp-harvest

@@ -5,6 +5,7 @@ ENV container docker
 COPY netapp-harvest-*.zip /root/
 COPY netapp-manageability-sdk-*.zip /root/
 COPY *.sh /root/
+COPY *.json /root/
 COPY bashrc /root/.bashrc
 COPY netapp_harvest_automated_setup /etc/init.d/
 WORKDIR /root
