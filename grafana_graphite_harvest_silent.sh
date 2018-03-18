@@ -16,7 +16,7 @@ SILENT_GRAPHITE=$(expect -c "
 
 set timeout 10
 
-spawn /usr/lib/python2.6/site-packages/graphite/manage.py syncdb
+spawn /usr/lib/python2.7/site-packages/graphite/manage.py syncdb
 
 expect \"Would you like to create one now? (yes/no):\"
 send \"yes\r\"
@@ -39,7 +39,7 @@ expect eof
 echo "$SILENT_GRAPHITE"
 
 # Restart mysqld to avoid any database locking issues
-/etc/init.d/mysqld restart 2>&1
+systemctl restart mariadb 2>&1
 
 sed -i 's/MAX_CREATES_PER_MINUTE =.*/MAX_CREATES_PER_MINUTE = 500/g' /etc/carbon/carbon.conf
 
@@ -132,24 +132,34 @@ cat << EOF > /etc/httpd/conf.d/graphite-web.conf
 # Graphite Web Basic mod_wsgi vhost
 
 <VirtualHost *:8080>
-    ServerName graphite-web
-    DocumentRoot "/usr/share/graphite/webapp"
-    ErrorLog /var/log/httpd/graphite-web-error.log
-    CustomLog /var/log/httpd/graphite-web-access.log common
-    Alias /media/ "/usr/lib/python2.6/site-packages/django/contrib/admin/media/"
-    Alias /content "/usr/share/graphite/webapp/content/"
+  ServerName graphite-web
+  DocumentRoot "/usr/share/graphite/webapp"
+  ErrorLog /var/log/httpd/graphite-web-error.log
+  CustomLog /var/log/httpd/graphite-web-access.log common
 
-    WSGIScriptAlias / /usr/share/graphite/graphite-web.wsgi
-    WSGIImportScript /usr/share/graphite/graphite-web.wsgi process-group=%{GLOBAL} application-group=%{GLOBAL}
+  # Header set Access-Control-Allow-Origin "*"
+  # Header set Access-Control-Allow-Methods "GET, OPTIONS"
+  # Header set Access-Control-Allow-Headers "origin, authorization, accept"
+  # Header set Access-Control-Allow-Credentials true
 
-    <Location "/content/">
-        SetHandler None
-    </Location>
+  WSGIScriptAlias / /usr/share/graphite/graphite-web.wsgi
+  WSGIImportScript /usr/share/graphite/graphite-web.wsgi process-group=%{GLOBAL} application-group=%{GLOBAL}
 
-    <Location "/media/">
-        SetHandler None
-    </Location>
+  <Location "/content/">
+    SetHandler None
+  </Location>
 
+  Alias /media/ "/usr/lib/python2.7/site-packages/django/contrib/admin/media/"
+  <Location "/media/">
+    SetHandler None
+  </Location>
+
+  <Directory "/usr/share/graphite/">
+    # Apache 2.2
+    Require all granted
+    Order allow,deny
+    Allow from all
+  </Directory>
 </VirtualHost>
 EOF
 
@@ -158,7 +168,7 @@ chmod 775 /var/log/graphite-web/
 chmod 775 /var/lib/graphite-web/
 
 # Restart Apache to apply the previous configuration changes
-/etc/init.d/httpd restart 2>&1 
+systemctl restart httpd 2>&1 
 
 echo "Setup of Graphite is complete."
 ###
@@ -171,7 +181,7 @@ sed -i 's/;http_port.*/http_port = 80/g' /etc/grafana/grafana.ini
 setcap 'cap_net_bind_service=+ep' /usr/sbin/grafana-server
 
 # Restart Grafana to apply the change the in previous step
-/etc/init.d/grafana-server restart 2>&1
+systemctl restart grafana-server 2>&1
 sleep 10
 
 # If HTTP/HTTPS proxy environment variables are set, temporarily unset them so the appropriate curl commands do not fail
@@ -281,7 +291,7 @@ unzip netapp-manageability-sdk-*.zip netapp-manageability-sdk-*/lib/perl/NetApp/
 mv -v netapp-manageability-sdk-*/lib/perl/NetApp/* /opt/netapp-harvest/lib/
 
 # Copy the updated node dashboard files which include the latest fixes as of 2017-07-13
-mv -v db_netapp-*.json /opt/netapp-harvest/grafana/
+#mv -v db_netapp-*.json /opt/netapp-harvest/grafana/
 
 # Enable Harvest to start at boot and start it
 ln -s /opt/netapp-harvest/util/netapp-harvest /etc/init.d/
@@ -293,8 +303,8 @@ chkconfig netapp-harvest on
 /opt/netapp-harvest/netapp-manager -import
 
 # Final restart of Apache & MySQL
-/etc/init.d/mysqld restart 2>&1
-/etc/init.d/httpd restart 2>&1 
+systemctl restart mariadb 2>&1
+systemctl restart httpd 2>&1 
 
 echo "Setup of Harvest is complete."
 ###
