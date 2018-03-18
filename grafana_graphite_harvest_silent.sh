@@ -41,6 +41,17 @@ echo "$SILENT_GRAPHITE"
 # Restart mysqld to avoid any database locking issues
 systemctl restart mariadb 2>&1
 
+# Fix Graphite Database File Directory Permissions if need be
+CARBONUID=$(id -u carbon)
+CARBONGID=$(id -g carbon)
+CARBONDATADIR="/var/lib/carbon/whisper"
+CURCARBONDIROWNER=$(ls -ldn $CARBONDATADIR | awk '{ print $3 }')
+
+if [ "$CURCARBONDIROWNER" -ne "$CARBONUID" ]; then
+  echo "Fixing Graphite Database File Directory permissions..."
+  chown -Rv ${CARBONUID}:${CARBONGID} $CARBONDATADIR
+fi
+
 sed -i 's/MAX_CREATES_PER_MINUTE =.*/MAX_CREATES_PER_MINUTE = 500/g' /etc/carbon/carbon.conf
 
 cat << EOF > /etc/carbon/storage-schemas.conf
