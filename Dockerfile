@@ -1,4 +1,5 @@
-FROM centos:latest
+#FROM centos:latest
+FROM centos:centos7
 MAINTAINER Dan Burkland <dburkland@dburkland.com>
 ENV container docker
 COPY netapp-harvest-*.zip /root/
@@ -8,9 +9,9 @@ COPY *.sh /root/
 COPY bashrc /root/.bashrc
 COPY netapp_harvest_automated_setup /etc/init.d/
 WORKDIR /root
-RUN cat netapp-manageability-sdk-9.5* > netapp-manageability-sdk-9.5.zip
+RUN cat netapp-manageability-sdk-9.7* > netapp-manageability-sdk-9.7.zip
 RUN mkdir /opt/netapp-harvest-conf
-RUN yum -y install http://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm
+RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 RUN yum -y update
 RUN yum -y install initscripts; rm /etc/rc.d/rc*.d/*
 RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
